@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { document } from "../data/document";
 
 const MainView = (props) => {
@@ -9,11 +9,16 @@ const MainView = (props) => {
     const [email, setEmail] = useState('');
 
     const [newIncident, setNewIncident] = useState('');
-    const [newAttempt, setNewAttempt] = useState('');
-    const [newSkype, setNewSkype] = useState('');
-    const [newVoice, setNewVoice] = useState('');
+    const [newAttempt, setNewAttempt] = useState('First');
+    const [newSkype, setNewSkype] = useState('N/A');
+    const [newVoice, setNewVoice] = useState('N/A');
+    const [newEmail, setNewEmail] = useState('N/A');
     const [newWorkNotes, setNewWorkNotes] = useState('');
     const [newAdditionalNotes, setNewAdditionalNotes] = useState('');
+
+    const workNotesRef = useRef(null);
+    const additionalNotesRef = useRef(null);
+    const emailRef = useRef(null);
 
     useEffect(() => {
         if(!workNotes) {setWorkNotes(document.data.workNotes)}
@@ -21,7 +26,103 @@ const MainView = (props) => {
         if(!email) {setEmail(document.data.email)}
     }, []);
 
+    const styles = {
+        labels: {
+            class: "work-notes__actions--labels",
+            inputDescriptions: [
+                "Please enter the incident number e.g. INC9999999",
+                "Please enter the contact attempt",
+                "Please enter the skype work notes",
+                "Please enter the voice work notes",
+                "Please enter the email work notes"
+            ],
+            areaDescriptions:[
+                "Please enter the body of the work notes",
+                "Please enter the additional notes"
+            ]
+        },
+        inputs: {
+            class: "work-notes__actions--inputs",
+            type: "text",
+            ids: [
+                {
+                    id: "incident",
+                    setter: setNewIncident,
+                    getter: newIncident
+                },
+                {
+                    id: "contact-attempt",
+                    setter: setNewAttempt,
+                    getter: newAttempt
+                },
+                {
+                    id: "skype",
+                    setter: setNewSkype,
+                    getter: newSkype
+                },
+                {
+                    id: "voice",
+                    setter: setNewVoice,
+                    getter: newVoice
+                },
+                {
+                    id: "email",
+                    setter: setNewEmail,
+                    getter: newEmail
+                }
+            ]
+        },
+        textAreas: {
+            class: "work-notes__actions--inputs",
+            ids: [
+                {
+                    id: "work-notes",
+                    setter: setNewWorkNotes,
+                    getter: newWorkNotes
+                },
+                {
+                    id: "additional-notes",
+                    setter: setNewAdditionalNotes,
+                    getter: newAdditionalNotes
+                }
+            ]
+        }
+    };
 
+
+    const populateInputs = () => {
+        let inputs = [];
+
+        for(let i = 0; i < styles.inputs.ids.length; i++){
+            inputs.push(
+                <li key={styles.inputs.ids.id}>
+                    <label className={styles.labels.class} htmlFor={styles.inputs.ids[i].id}>{styles.labels.inputDescriptions[i]}</label>
+                    <input className={styles.inputs.class} id={styles.inputs.ids[i].id} type={styles.inputs.type}
+                           onChange={event => styles.inputs.ids[i].setter(event.target.value)}
+                           value={styles.inputs.ids[i].getter}/>
+                </li>
+            )
+        }
+
+        return inputs;
+    };
+
+    const populateTextarea = () => {
+        let textareas = [];
+
+        for(let i = 0; i < styles.textAreas.ids.length; i++){
+            textareas.push(
+                <li key={styles.textAreas.ids.id}>
+                    <label className={styles.labels.class} htmlFor={styles.textAreas.ids[i].id}>{styles.labels.areaDescriptions[i]}</label>
+                    <textarea className={styles.textAreas.class} id={styles.textAreas.ids[i]}
+                           onChange={event => styles.textAreas.ids[i].setter(event.target.value)}
+                           value={styles.textAreas.ids[i].getter}/>
+                </li>
+            )
+        }
+
+        return textareas;
+    };
 
     const updateWorkNotes = (event) => {
         event.preventDefault();
@@ -29,9 +130,12 @@ const MainView = (props) => {
             .replace("$WHICH$", newAttempt)
             .replace("$SKYPE$", newSkype)
             .replace("$VOICE$", newVoice)
-            .replace("$WORKNOTES$", newWorkNotes));
+            .replace("$WORKNOTES$", newWorkNotes)
+            .replace("$EMAIL$", newEmail));
+
+        setAdditionalNotes(additionalNotes
+            .replace("$ADDITIONALNOTES$", newAdditionalNotes));
     };
-ut
 
     function onChange(event) {
         let file = event.target.files[0];
@@ -55,37 +159,11 @@ ut
         <main className="section-main-view">
             <form action="" className="work-notes-inputs">
                 <ul className="work-notes__actions">
-                    <li>
-                        <label className="work-notes__actions--labels" htmlFor="incident">Please enter the incident number e.g. INC9999999</label>
-                        <input className="work-notes__actions--inputs" id="incident" type="text"
-                               onChange={event => setNewIncident(event.target.value)} value={newIncident}/>
-                    </li>
-
-                    <li>
-                        <label className="work-notes__actions--labels" htmlFor="contact-attempt">Please enter the contact attempt</label>
-                        <input className="work-notes__actions--inputs" id="contact-attempt" type="text"
-                               onChange={event => setNewAttempt(event.target.value)} value={newAttempt}/>
-                    </li>
-
-                    <li>
-                        <label className="work-notes__actions--labels" htmlFor="skype">Please enter the skype work notes</label>
-                        <input className="work-notes__actions--inputs" id="skype" type="text"
-                               onChange={event => setNewSkype(event.target.value)} value={newSkype}/>
-                    </li>
-
-                    <li>
-                        <label className="work-notes__actions--labels" htmlFor="voice">Please enter the voice work notes</label>
-                        <input className="work-notes__actions--inputs" id="voice" type="text"
-                               onChange={event => setNewVoice(event.target.value)} value={newVoice}/>
-                    </li>
-
-                    <li>
-                        <label className="work-notes__actions--labels" htmlFor="work-notes">Please enter the work notes</label>
-                        <textarea className="work-notes__actions--inputs" id="work-notes"
-                               onChange={event => setNewWorkNotes(event.target.value)} value={newWorkNotes}/>
-                    </li>
+                    {populateInputs()}
+                    {populateTextarea()}
                     <li>
                         <button onClick={event => updateWorkNotes(event)}>Replace</button>
+                        <button>Copy</button>
                     </li>
                 </ul>
             </form>
@@ -97,17 +175,18 @@ ut
             <div className="displays">
                 <div className="notes-column">
                     <div className="notes-column__work-notes">
-                        <textarea onChange={e => setWorkNotes(e.target.value)} value={workNotes} name="" id="" cols="30" rows="10">
+                        <textarea onChange={e => setWorkNotes(e.target.value)} value={workNotes}
+                                  name="" id="" cols="30" rows="10" ref={workNotesRef}>
                         </textarea>
                     </div>
                     <div className="notes-column__additional-notes">
-                        <textarea name="" id="" cols="30" rows="10" value={additionalNotes}
+                        <textarea name="" id="" cols="30" rows="10" value={additionalNotes} ref={additionalNotesRef}
                         onChange={event => setAdditionalNotes(event.target.value)}>
                         </textarea>
                     </div>
                 </div>
                 <div className="email">
-                    <textarea name="" id="" cols="30" rows="10" value={email}
+                    <textarea name="" id="" cols="30" rows="10" value={email} ref={emailRef}
                     onChange={event => setEmail(event.target.value)}>
                     </textarea>
                 </div>
