@@ -1,140 +1,84 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { document } from "../data/document";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { fetchAllTemplates, createTemplate } from "../actions";
+import { connect } from 'react-redux';
 
 const MainView = (props) => {
 
-    const [workNotes,setWorkNotes] = useState('');
-    const [additionalNotes, setAdditionalNotes] = useState('');
-    const [email, setEmail] = useState('');
+    props.fetchAllTemplates();
 
-    const [newIncident, setNewIncident] = useState('');
-    const [newAttempt, setNewAttempt] = useState('First');
-    const [newSkype, setNewSkype] = useState('N/A');
-    const [newVoice, setNewVoice] = useState('N/A');
-    const [newEmail, setNewEmail] = useState('N/A');
-    const [newWorkNotes, setNewWorkNotes] = useState('');
-    const [newAdditionalNotes, setNewAdditionalNotes] = useState('');
+    const [state, setState] = useState({
+        workNotesName: '',
+        workNotes: '',
+        additionalNotes: '',
+        email: '',
 
-    const workNotesRef = useRef(null);
-    const additionalNotesRef = useRef(null);
-    const emailRef = useRef(null);
+        newIncident: '',
+        newAttempt: '',
+        newSkype: '',
+        newVoice: '',
+        newEmail: '',
+        newWorkNotes: '',
+        newAdditionalNotes: ''
+    });
+
+    // const workNotesRef = useRef(null);
+    // const additionalNotesRef = useRef(null);
+    // const emailRef = useRef(null);
 
     useEffect(() => {
-        if(!workNotes) {setWorkNotes(document.data.workNotes)}
-        if(!additionalNotes) {setAdditionalNotes(document.data.additionalNotes)}
-        if(!email) {setEmail(document.data.email)}
-    }, []);
 
-    const styles = {
-        labels: {
-            class: "work-notes__actions--labels",
-            inputDescriptions: [
-                "Please enter the incident number e.g. INC9999999",
-                "Please enter the contact attempt",
-                "Please enter the skype work notes",
-                "Please enter the voice work notes",
-                "Please enter the email work notes"
-            ],
-            areaDescriptions:[
-                "Please enter the body of the work notes",
-                "Please enter the additional notes"
-            ]
-        },
-        inputs: {
-            class: "work-notes__actions--inputs",
-            type: "text",
-            ids: [
-                {
-                    id: "incident",
-                    setter: setNewIncident,
-                    getter: newIncident
-                },
-                {
-                    id: "contact-attempt",
-                    setter: setNewAttempt,
-                    getter: newAttempt
-                },
-                {
-                    id: "skype",
-                    setter: setNewSkype,
-                    getter: newSkype
-                },
-                {
-                    id: "voice",
-                    setter: setNewVoice,
-                    getter: newVoice
-                },
-                {
-                    id: "email",
-                    setter: setNewEmail,
-                    getter: newEmail
-                }
-            ]
-        },
-        textAreas: {
-            class: "work-notes__actions--inputs",
-            ids: [
-                {
-                    id: "work-notes",
-                    setter: setNewWorkNotes,
-                    getter: newWorkNotes
-                },
-                {
-                    id: "additional-notes",
-                    setter: setNewAdditionalNotes,
-                    getter: newAdditionalNotes
-                }
-            ]
-        }
-    };
-
-
-    const populateInputs = () => {
-        let inputs = [];
-
-        for(let i = 0; i < styles.inputs.ids.length; i++){
-            inputs.push(
-                <li key={styles.inputs.ids.id}>
-                    <label className={styles.labels.class} htmlFor={styles.inputs.ids[i].id}>{styles.labels.inputDescriptions[i]}</label>
-                    <input className={styles.inputs.class} id={styles.inputs.ids[i].id} type={styles.inputs.type}
-                           onChange={event => styles.inputs.ids[i].setter(event.target.value)}
-                           value={styles.inputs.ids[i].getter}/>
-                </li>
-            )
+        if(props.match.url === '/createTemplate'){
+            if(!state.workNotes) {
+                setState({ ...state,
+                workNotes: document.data.workNotes,
+                additionalNotes: document.data.additionalNotes,
+                email: document.data.email});
+            }
         }
 
-        return inputs;
-    };
-
-    const populateTextarea = () => {
-        let textareas = [];
-
-        for(let i = 0; i < styles.textAreas.ids.length; i++){
-            textareas.push(
-                <li key={styles.textAreas.ids.id}>
-                    <label className={styles.labels.class} htmlFor={styles.textAreas.ids[i].id}>{styles.labels.areaDescriptions[i]}</label>
-                    <textarea className={styles.textAreas.class} id={styles.textAreas.ids[i]}
-                           onChange={event => styles.textAreas.ids[i].setter(event.target.value)}
-                           value={styles.textAreas.ids[i].getter}/>
-                </li>
-            )
+        if(props.match.params.name !== undefined){
+            setState({ ...state,
+                workNotes: props.template.workNotes,
+                additionalNotes: props.template.additionalNotes,
+                email: props.template.email
+            }) ;
         }
 
-        return textareas;
+    }, [props.template]);
+
+
+    const filterObject = (object) => {
+        return object
+            .replace("$WHICH$", state.newAttempt)
+            .replace("$SKYPE$", state.newSkype)
+            .replace("$VOICE$", state.newVoice)
+            .replace("$WORKNOTES$", state.newWorkNotes)
+            .replace("$EMAIL$", state.newEmail)
+            .replace("$ADDITIONALNOTES$", state.newAdditionalNotes)
+            .replace("$INCIDENT$", state.newIncident);
     };
 
     const updateWorkNotes = (event) => {
         event.preventDefault();
-        setWorkNotes(workNotes
-            .replace("$WHICH$", newAttempt)
-            .replace("$SKYPE$", newSkype)
-            .replace("$VOICE$", newVoice)
-            .replace("$WORKNOTES$", newWorkNotes)
-            .replace("$EMAIL$", newEmail));
+        setState({ ...state,
+            workNotes: filterObject(state.workNotes),
+            additionalNotes: filterObject(state.additionalNotes),
+            email: filterObject(state.email)
+        });
+    };
 
-        setAdditionalNotes(additionalNotes
-            .replace("$ADDITIONALNOTES$", newAdditionalNotes));
+    const saveWorkNotes = (event) => {
+        props.createTemplate({
+            data: {
+                name: state.workNotesName,
+                workNotes: state.workNotes,
+                additionalNotes: state.additionalNotes,
+                email: state.email
+            }
+        });
     };
 
     function onChange(event) {
@@ -148,22 +92,104 @@ const MainView = (props) => {
         reader.readAsText(file);
     }
 
+    console.log(props);
+
+
     const myJSON = JSON.stringify(document);
 
     let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(document));
-    // test.setAttribute("href", dataStr);
-    // test.setAttribute("download", "scene.json");
-    // test.click();
+
+    const renderSaveEditOptions = () => {
+
+        function returnHtml(readOnlyFlag, label){
+            return (
+                <div className="save-options" >
+                    <label htmlFor="save-input" style={{display: 'block'}}>{label}</label>
+                    <input id="save-input" type="text" readOnly={readOnlyFlag}
+                           onChange={event => setState({
+                               ...state, workNotesName: event.target.value } )}
+                           value={state.workNotesName}/>
+
+                    <button onClick={event => saveWorkNotes(event)}>Save</button>
+                </div>
+            );
+        }
+
+        if(props.match.url === '/createTemplate'){
+
+            const label = "New Template Name:";
+
+            return returnHtml(false, label);
+
+        } else if(props.match.path === "/editTemplate/:name"){
+
+            const label = "Edit Template Name";
+
+            return returnHtml(true, label);
+        }
+    };
+
 
     return (
         <main className="section-main-view">
             <form action="" className="work-notes-inputs">
                 <ul className="work-notes__actions">
-                    {populateInputs()}
-                    {populateTextarea()}
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="incident">Please enter the incident number e.g. INC9999999</label>
+                        <input className="work-notes__actions--inputs" id="incident" type="text"
+                               onChange={event => setState({
+                                   ...state, newIncident: event.target.value } )}
+                               value={state.newIncident}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="contact-attempt">Contact Attempt</label>
+                        <input className="work-notes__actions--inputs" id="contact-attempt" type="text"
+                               onChange={event => setState({
+                                   ...state, newAttempt: event.target.value } )}
+                               value={state.newAttempt}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="skype">Skype Work Notes</label>
+                        <input className="work-notes__actions--inputs" id="skype" type="text"
+                               onChange={event => setState({
+                                   ...state, newSkype: event.target.value } )}
+                               value={state.newSkype}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="voice">Voice Work Notes</label>
+                        <input className="work-notes__actions--inputs" id="voice" type="text"
+                               onChange={event => setState({
+                                   ...state, newVoice: event.target.value } )}
+                               value={state.newVoice}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="email">Email Work Notes</label>
+                        <input className="work-notes__actions--inputs" id="email" type="text"
+                               onChange={event => setState({
+                                   ...state, newEmail: event.target.value } )}
+                               value={state.newEmail}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="work-notes">Work Notes Body</label>
+                        <textarea className="work-notes__actions--inputs" id="work-notes"
+                               onChange={event => setState({
+                                   ...state, newWorkNotes: event.target.value } )}
+                               value={state.newWorkNotes}/>
+                    </li>
+                    <li>
+                        <label className="work-notes__actions--inputs" htmlFor="additional-notes">Additional Notes</label>
+                        <textarea className="work-notes__actions--inputs" id="additional-notes"
+                               onChange={event => setState({
+                                   ...state, newAdditionalNotes: event.target.value } )}
+                               value={state.newAdditionalNotes}/>
+                    </li>
                     <li>
                         <button onClick={event => updateWorkNotes(event)}>Replace</button>
-                        <button>Copy</button>
+                        <CopyToClipboard text={state.workNotes}>
+                            <button onClick={event => event.preventDefault()}>Copy</button>
+                        </CopyToClipboard>
+                        <button onClick={event => saveWorkNotes(event)}>Save</button>
+
                     </li>
                 </ul>
             </form>
@@ -172,22 +198,27 @@ const MainView = (props) => {
             <a id="downloadAnchorElem" style={{display: 'none'}}></a>
 
 
+
             <div className="displays">
+
                 <div className="notes-column">
+
+                    {renderSaveEditOptions()}
+
                     <div className="notes-column__work-notes">
-                        <textarea onChange={e => setWorkNotes(e.target.value)} value={workNotes}
-                                  name="" id="" cols="30" rows="10" ref={workNotesRef}>
+                        <textarea onChange={e => setState({ ...state, workNotes: e.target.value} )} value={state.workNotes}
+                                  name="" id="" cols="30" rows="10">
                         </textarea>
                     </div>
                     <div className="notes-column__additional-notes">
-                        <textarea name="" id="" cols="30" rows="10" value={additionalNotes} ref={additionalNotesRef}
-                        onChange={event => setAdditionalNotes(event.target.value)}>
+                        <textarea name="" id="" cols="30" rows="10"
+                                  onChange={e => setState({ ...state, additionalNotes: e.target.value} )} value={state.additionalNotes}>
                         </textarea>
                     </div>
                 </div>
                 <div className="email">
-                    <textarea name="" id="" cols="30" rows="10" value={email} ref={emailRef}
-                    onChange={event => setEmail(event.target.value)}>
+                    <textarea name="" id="" cols="30" rows="10"
+                              onChange={e => setState({ ...state, email: e.target.value} )} value={state.email}>
                     </textarea>
                 </div>
             </div>
@@ -195,4 +226,11 @@ const MainView = (props) => {
     );
 };
 
-export default MainView;
+const mapStateToProps = (state, prevProps) => {
+
+    if(prevProps.match.params.name){
+        return { template: state.templates[prevProps.match.params.name] };
+    }
+};
+
+export default connect(mapStateToProps, { fetchAllTemplates, createTemplate })(MainView);

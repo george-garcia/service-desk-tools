@@ -1,5 +1,7 @@
 export const document = {
     data: {
+        id: 1,
+        name: "Default Template",
         workNotes: 'WORK NOTES\n' +
                 '\n' +
             '$WHICH$ Contact Attempt\n' +

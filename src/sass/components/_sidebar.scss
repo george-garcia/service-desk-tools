@@ -10,3 +10,20 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
+.sidebar-list{
+  list-style: none;
+  font-size: 1.6rem;
+
+  &--link{
+    &:link, &:visited{
+      text-decoration: none;
+      color: lightgrey;
+    }
+  }
+
+  &--item{
+
+
+    }
+}

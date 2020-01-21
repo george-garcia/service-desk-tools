@@ -26,19 +26,16 @@
 
 .work-notes__actions{
   font-size: 1.2rem;
-  margin: 0rem 0 0 10rem;
 
   list-style: none;
 
   &--labels{
-    margin-bottom: 1rem;
-    display: block;
   }
 
   &--inputs{
-    margin-left: 2rem;
-    margin-bottom: 2rem;
+    margin: 0 0 1rem 3rem;
     width: 30rem;
+    display: block;
   }
 
   & textarea{
@@ -50,6 +47,14 @@
   display: flex;
 }
 
+.save-options{
+  display: block;
+  margin: 0 0 2rem 5rem;
+  position: absolute;
+  left: 45%;
+
+}
+
 .notes-column{
   display: flex;
   flex-direction: column;
@@ -59,6 +64,9 @@
     height: 30rem;
     width: 40rem;
     background-color: #777777;
+    position: absolute;
+    top: 18%;
+    left: 45%;
 
   }
 
@@ -67,14 +75,20 @@
     height: 30rem;
     width: 40rem;
     background-color: #777777;
+    position: absolute;
+    top: 53%;
+    left: 45%;
   }
 }
 
 .email{
-  margin: 0 0 0 5rem;
+  margin: 6rem 0 0 5rem;
   height: 65rem;
   width: 45rem;
   background-color: #777777;
+  position: absolute;
+  top: 11.5%;
+  left: 67%;
 }
 
 .displays textarea{

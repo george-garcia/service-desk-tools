@@ -9,5 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="trillo" />
+    <orderEntry type="module" module-name="natours-front-end" />
   </component>
 </module>
